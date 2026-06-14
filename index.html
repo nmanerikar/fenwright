@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FENwright, A live demo</title>
+<style>
+  @font-face {
+    font-family: "FENwright";
+    src: url("FENwright-Regular.woff2") format("woff2"),
+         url("FENwright-Regular.woff")  format("woff"),
+         url("FENwright-Regular.otf")   format("opentype");
+    font-display: block;
+  }
+  :root { --ink:#1c1c1e; --muted:#6b6b70; --line:#e4e4ea; --accent:black; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: system-ui, -apple-system, sans-serif; color: var(--ink);
+    margin: 0; padding: 2.6rem 2rem; background:#fafafa; text-align: center;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; }
+  #presets{ margin-top:3rem;margin-bottom:3rem;}
+  h1 { font-size: 2.4rem; line-height: 1.05; margin: 0 0 .4rem; letter-spacing: -.02em; }
+  .sub { color: var(--muted); font-size: .95rem; margin: 0 0 1.9rem; }
+
+  .presets {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: .7rem;
+    margin-bottom: 1.5rem;
+  }
+  .presets button {
+    padding: .75rem 1.2rem; border: 2px solid var(--line);
+    background: #fff; border-radius: 14px; cursor: pointer; font: inherit;
+    font-size: .9rem; font-weight: 700; white-space: nowrap; transition: .12s;
+  }
+  .presets button:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .presets button.active { background: var(--accent); color:#fff; border-color: var(--accent); }
+
+  .controls { margin: 0 auto; }
+  input[type=text] {
+    width: calc(71ch + 2rem); max-width: 100%; display: block; margin: 0 auto;
+    font: 16px/1.4 ui-monospace, monospace; text-align: center;
+    padding: .75rem 1rem; border:2px solid var(--line); border-radius:12px;
+  }
+  .row { display:flex; align-items:center; justify-content:center; gap:.75rem; margin-top:.95rem; }
+  .row label { font-size:.8rem; color:var(--muted); font-weight:600; }
+  .row input[type=range] { width: 195px; height: 5px; }
+
+  .board {
+    font-family: "FENwright"; font-size: 465px; line-height: 1;
+    font-feature-settings: "calt" 1, "kern" 1;
+    font-variant-ligatures: contextual;
+    white-space: pre; display: inline-block; border: 2px solid var(--line);
+    background:#fff; border-radius: 15px; margin-top: 1.5rem;
+  }
+  code { background:#f0f0f3; padding:.15em .4em; border-radius:5px; }
+  .hint { color: var(--muted); font-size: .8rem; margin-top: 1rem; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>FENwright</h1>
+    <p>A FEN-to-Chessboard font
+    </p>
+
+    <div class="presets" id="presets"></div>
+
+    <div class="controls">
+      <input type="text" id="fen" spellcheck="false" autocomplete="off">
+      <p class="hint">
+        Pieces: <code>KQRBNP</code> white /
+        <code>kqrbnp</code> black; <code>1&ndash;8</code> = empty squares;
+        <code>/</code> ends a rank.
+      </p>
+    </div>
+
+    <div class="board" id="board"></div>
+      <div class="row">
+        <label>Size</label>
+        <input type="range" id="size" min="180" max="675" value="465">
+      </div>
+  </div>
+
+<script>
+  // Board-placement field of a FEN (the part before the first space).
+  const POSITIONS = [
+    { name: "Starting position",
+      fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR" },
+    { name: "Queen's Gambit Declined",
+      fen: "r1bq1rk1/pppnbppp/4pn2/3p2B1/2PP4/2N1PN2/PP3PPP/R2QKB1R" },
+    { name: "Immortal Game",
+      fen: "r1bk3r/p2pBpNp/n4n2/1p1NP2P/6P1/3P4/P1P1K3/q5b1" },
+    { name: "Sicilian Najdorf",
+      fen: "r1bqk2r/1p1n1ppp/p2pbn2/4p3/4P3/1NN1BP2/PPPQ2PP/R3KB1R" },
+  ];
+
+  const board   = document.getElementById('board');
+  const fenInput= document.getElementById('fen');
+  const presets = document.getElementById('presets');
+  const sizer   = document.getElementById('size');
+
+  POSITIONS.forEach((p, i) => {
+    const b = document.createElement('button');
+    b.textContent = p.name;
+    b.onclick = () => select(i);
+    presets.appendChild(b);
+  });
+
+  function paint() { board.textContent = fenInput.value; }
+  function select(i) {
+    fenInput.value = POSITIONS[i].fen;
+    [...presets.children].forEach((el, k) => el.classList.toggle('active', k === i));
+    paint();
+  }
+
+  fenInput.addEventListener('input', () => {
+    [...presets.children].forEach(el => el.classList.remove('active'));
+    paint();
+  });
+  sizer.addEventListener('input', () => board.style.fontSize = sizer.value + 'px');
+
+  select(0);
+</script>
+</body>
+</html>
